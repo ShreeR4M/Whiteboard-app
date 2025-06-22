@@ -101,7 +101,10 @@ npm start
 
 ## Screenshots
 
-*[Add screenshots of your application here]*
+![image](https://github.com/user-attachments/assets/c8bd0f8c-ae86-47a2-8406-de4241d3d2f6)
+![image](https://github.com/user-attachments/assets/aae8dc49-7d46-4221-ac78-df35ca80c084)
+
+
 
 ## Future Enhancements
 
