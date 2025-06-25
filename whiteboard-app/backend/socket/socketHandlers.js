@@ -97,6 +97,48 @@ class SocketHandlers {
       }
     });
 
+    // Chat message handling
+    socket.on('chat-message', (data) => {
+      try {
+        const userInfo = this.userSockets.get(socket.id);
+        if (!userInfo) return;
+
+        const { roomId } = userInfo;
+        const messageData = {
+          userId: data.userId,
+          username: data.username,
+          message: data.message,
+          timestamp: new Date()
+        };
+
+        // Broadcast to all users in the room including sender
+        this.io.to(roomId).emit('chat-message', messageData);
+        
+        console.log(`Chat message in room ${roomId} from ${data.username}: ${data.message}`);
+      } catch (error) {
+        console.error('Error handling chat message:', error);
+      }
+    });
+
+    // User typing indicator
+    socket.on('user-typing', (data) => {
+      try {
+        const userInfo = this.userSockets.get(socket.id);
+        if (!userInfo) return;
+
+        const { roomId } = userInfo;
+        
+        // Broadcast typing status to other users in the room (not sender)
+        socket.to(roomId).emit('user-typing', {
+          userId: data.userId,
+          username: data.username,
+          isTyping: data.isTyping
+        });
+      } catch (error) {
+        console.error('Error handling typing indicator:', error);
+      }
+    });
+
     socket.on('save-canvas', async (data) => {
       try {
         const userInfo = this.userSockets.get(socket.id);
@@ -116,6 +158,48 @@ class SocketHandlers {
       } catch (error) {
         console.error('Error saving canvas:', error);
         socket.emit('canvas-saved', { success: false, error: error.message });
+      }
+    });
+
+    // Chat message handling
+    socket.on('chat-message', (data) => {
+      try {
+        const userInfo = this.userSockets.get(socket.id);
+        if (!userInfo) return;
+
+        const { roomId } = userInfo;
+        const messageData = {
+          userId: data.userId,
+          username: data.username,
+          message: data.message,
+          timestamp: new Date()
+        };
+
+        // Broadcast to all users in the room including sender
+        this.io.to(roomId).emit('chat-message', messageData);
+        
+        console.log(`Chat message in room ${roomId} from ${data.username}: ${data.message}`);
+      } catch (error) {
+        console.error('Error handling chat message:', error);
+      }
+    });
+
+    // User typing indicator
+    socket.on('user-typing', (data) => {
+      try {
+        const userInfo = this.userSockets.get(socket.id);
+        if (!userInfo) return;
+
+        const { roomId } = userInfo;
+        
+        // Broadcast typing status to other users in the room (not sender)
+        socket.to(roomId).emit('user-typing', {
+          userId: data.userId,
+          username: data.username,
+          isTyping: data.isTyping
+        });
+      } catch (error) {
+        console.error('Error handling typing indicator:', error);
       }
     });
 
