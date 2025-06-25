@@ -141,12 +141,15 @@ You can try out the application at our live demo:
 - Mobile app version
 - Custom templates for different use cases
 
+## Host
+Render : https://whiteboard-backend-07zw.onrender.com
+Vercel : https://whiteboard-frontend-jade.vercel.app/
+
 ---
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgements
 
 - Fabric.js for the powerful canvas manipulation library
