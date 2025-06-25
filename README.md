@@ -110,8 +110,6 @@ Open your browser and navigate to `http://localhost:3000`
 ## Deployed Demo
 
 You can try out the application at our live demo:
-- Frontend: [https://whiteboard-app-sooty.vercel.app](https://whiteboard-app-sooty.vercel.app)
-- Backend: [https://whiteboard-backend.onrender.com](https://whiteboard-backend.onrender.com)
 
 ## Usage Guide
 
