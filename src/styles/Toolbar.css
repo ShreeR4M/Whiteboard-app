@@ -1,0 +1,22 @@
+/* ...existing code... */
+
+.history-controls {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.history-controls .tool-button {
+  padding: 8px 15px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.history-controls .tool-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* ...existing code... */

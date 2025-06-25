@@ -31,6 +31,8 @@ const Room = () => {
   
   const [isChatOpen, setIsChatOpen] = useState(false);
   
+  const [canUndo, setCanUndo] = useState(false);
+  
   const canvasRef = useRef(null);
   const fabricEventsRef = useRef(null);
   const shapeAddRef = useRef(null);
@@ -158,6 +160,17 @@ const Room = () => {
     }
   };
 
+  const handleUndo = () => {
+    if (fabricEventsRef.current && canUndo) {
+      fabricEventsRef.current.undo();
+    }
+  };
+
+  const handleUndoRedoStatusChange = (status) => {
+    setCanUndo(status.canUndo);
+    
+  };
+
   const handleLeaveRoom = () => {
     if (window.confirm('Are you sure you want to leave this room?')) {
       navigate('/');
@@ -219,10 +232,12 @@ const Room = () => {
         onClearCanvas={handleClearCanvas}
         onSaveCanvas={handleSaveCanvas}
         onAddShape={handleAddShape}
+        onUndo={handleUndo}
+        canUndo={canUndo}
         connectedUsers={connectedUsers}
         roomId={roomId}
       />
-      
+
       {/* Main Content Area */}
       <div className="flex-1 flex relative">
         {/* Canvas */}
@@ -234,6 +249,7 @@ const Room = () => {
             brushSize={brushSize}
             onCanvasReady={handleCanvasReady}
             onShapeAdd={shapeAddRef}
+            onUndoRedoStatusChange={handleUndoRedoStatusChange}
             roomId={roomId}
           />
         </div>

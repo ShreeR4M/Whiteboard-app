@@ -5,7 +5,37 @@ class FabricEventsManager {
     this.canvas = canvas;
     this.socketManager = socketManager;
     this.isReceivingEvent = false;
+    
+    this.undoStack = [];
+    
+    this.isUndoRedoOperation = false;
+    
+    this.eventCallbacks = {};
+    
     this.setupCanvasEvents();
+  }
+
+  on(eventName, callback) {
+    if (!this.eventCallbacks[eventName]) {
+      this.eventCallbacks[eventName] = [];
+    }
+    this.eventCallbacks[eventName].push(callback);
+  }
+
+  off(eventName, callback) {
+    if (!this.eventCallbacks[eventName]) return;
+    this.eventCallbacks[eventName] = this.eventCallbacks[eventName].filter(cb => cb !== callback);
+  }
+
+  emit(eventName, data) {
+    if (!this.eventCallbacks[eventName]) return;
+    this.eventCallbacks[eventName].forEach(callback => callback(data));
+  }
+
+  notifyHistoryChange() {
+    this.emit('history:changed', {
+      canUndo: this.undoStack.length > 0,
+    });
   }
 
   setupCanvasEvents() {
@@ -15,6 +45,16 @@ class FabricEventsManager {
       if (this.isReceivingEvent) return;
       
       const pathData = e.path.toObject();
+      
+      if (!this.isUndoRedoOperation) {
+        this.undoStack.push({
+          type: 'path',
+          object: e.path,
+          objectData: pathData
+        });
+        this.notifyHistoryChange();
+      }
+      
       this.socketManager.sendDrawingEvent({
         type: 'path:created',
         data: pathData
@@ -37,6 +77,15 @@ class FabricEventsManager {
       if (this.isReceivingEvent) return;
       if (e.target.type === 'path') return; 
       
+      if (!this.isUndoRedoOperation) {
+        this.undoStack.push({
+          type: 'object',
+          object: e.target,
+          objectData: e.target.toObject()
+        });
+        this.notifyHistoryChange();
+      }
+      
       this.socketManager.sendDrawingEvent({
         type: 'object:added',
         data: {
@@ -47,7 +96,7 @@ class FabricEventsManager {
     });
 
     this.canvas.on('object:removed', (e) => {
-      if (this.isReceivingEvent) return;
+      if (this.isReceivingEvent || this.isUndoRedoOperation) return;
       
       this.socketManager.sendDrawingEvent({
         type: 'object:removed',
@@ -142,6 +191,9 @@ class FabricEventsManager {
     this.canvas.backgroundColor = 'white';
     this.canvas.renderAll();
     this.isReceivingEvent = false;
+    
+    this.undoStack = [];
+    this.notifyHistoryChange();
   }
 
   clearCanvas() {
@@ -149,6 +201,9 @@ class FabricEventsManager {
     this.canvas.backgroundColor = 'white';
     this.canvas.renderAll();
     this.socketManager.clearCanvas();
+    
+    this.undoStack = [];
+    this.notifyHistoryChange();
   }
 
   saveCanvas() {
@@ -163,8 +218,35 @@ class FabricEventsManager {
     this.canvas.loadFromJSON(canvasData, () => {
       this.canvas.renderAll();
       this.isReceivingEvent = false;
+      
+      this.undoStack = [];
+      this.notifyHistoryChange();
     });
   }
+
+  undo() {
+    if (this.undoStack.length === 0) return;
+    
+    this.isUndoRedoOperation = true;
+    
+    const historyItem = this.undoStack.pop();
+    
+    if (historyItem) {
+      this.canvas.remove(historyItem.object);
+      this.canvas.renderAll();
+      
+      this.socketManager.sendDrawingEvent({
+        type: 'object:removed',
+        data: {
+          objectId: historyItem.object.id
+        }
+      });
+    }
+    
+    this.isUndoRedoOperation = false;
+    this.notifyHistoryChange();
+  }
+
 
   setDrawingMode(isDrawing) {
     this.canvas.isDrawingMode = isDrawing;

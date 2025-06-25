@@ -39,7 +39,6 @@ const ChatSidebar = ({
       }
     };
 
-    // Setup socket listeners
     socketManager.on('chat-message', handleChatMessage);
     socketManager.on('user-typing', handleUserTyping);
 

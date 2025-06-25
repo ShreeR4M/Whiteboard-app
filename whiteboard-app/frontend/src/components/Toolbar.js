@@ -10,6 +10,8 @@ const Toolbar = ({
   onClearCanvas,
   onSaveCanvas,
   onAddShape,
+  onUndo,
+  canUndo,
   connectedUsers,
   roomId 
 }) => {
@@ -79,6 +81,22 @@ const Toolbar = ({
                   {shape.label}
                 </button>
               ))}
+            </div>
+
+            {/* History Controls */}
+            <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+              <button
+                onClick={onUndo}
+                disabled={!canUndo}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  canUndo 
+                    ? 'text-gray-700 hover:bg-white hover:shadow-sm' 
+                    : 'text-gray-400 cursor-not-allowed'
+                }`}
+                title="Undo Last Action"
+              >
+                ↩️ Undo
+              </button>
             </div>
 
             {/* Color Picker */}

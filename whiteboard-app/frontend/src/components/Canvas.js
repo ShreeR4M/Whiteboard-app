@@ -9,13 +9,15 @@ const Canvas = ({
   brushSize,
   onCanvasReady,
   onShapeAdd,
-  roomId 
+  roomId,
+  onUndoRedoStatusChange
 }) => {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [fabricEvents, setFabricEvents] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const canvasInitializedRef = useRef(false); 
+  const [canUndo, setCanUndo] = useState(false);
 
   useEffect(() => {
     if (canvasRef.current && !canvas && !canvasInitializedRef.current) {
@@ -128,6 +130,23 @@ const Canvas = ({
   }, [socketManager, fabricEvents]);
 
   useEffect(() => {
+    if (fabricEvents) {
+      const handleUndoRedoStatusChange = (status) => {
+        setCanUndo(status.canUndo);        
+        if (onUndoRedoStatusChange) {
+          onUndoRedoStatusChange(status);
+        }
+      };
+      
+      fabricEvents.on('history:changed', handleUndoRedoStatusChange);
+      
+      return () => {
+        fabricEvents.off('history:changed', handleUndoRedoStatusChange);
+      };
+    }
+  }, [fabricEvents, onUndoRedoStatusChange]);
+
+  useEffect(() => {
     if (onShapeAdd && fabricEvents) {
       onShapeAdd.current = (shapeType, options = {}) => {
         switch (shapeType) {
@@ -191,7 +210,6 @@ const Canvas = ({
             style={{ maxWidth: '100%', height: 'auto' }}
           />
           
-          {}
           {currentTool && (
             <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
               {currentTool.charAt(0).toUpperCase() + currentTool.slice(1)} Mode
@@ -199,7 +217,6 @@ const Canvas = ({
           )}
         </div>
 
-        {}
         <div className="mt-2 text-center text-sm text-gray-500">
           Canvas: 1200 × 600 pixels
           {roomId && (
