@@ -143,6 +143,7 @@ You can try out the application at our live demo:
 
 ## Host
 Render : https://whiteboard-backend-07zw.onrender.com
+Vercel : https://whiteboard-frontend-jade.vercel.app/
 
 ---
 
