@@ -146,7 +146,7 @@ You can try out the application at our live demo:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
+Vercel: https://whiteboard-app-hpqk.vercel.app/
 ## Acknowledgements
 
 - Fabric.js for the powerful canvas manipulation library
