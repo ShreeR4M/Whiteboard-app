@@ -14,10 +14,17 @@ const server = http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "http://localhost:3000",
+      "https://whiteboard-frontend-jade.vercel.app",
+      "https://*.vercel.app",
+      process.env.FRONTEND_URL
+    ].filter(Boolean),
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 });
 
 // Connect to MongoDB
@@ -25,12 +32,15 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin:[
-     'http://localhost:3000','https://whiteboard-frontend-jade.vercel.app',
-    process.env.CORS_ORIGIN || '*'
-  ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'https://whiteboard-frontend-jade.vercel.app',
+    'https://*.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -47,7 +57,22 @@ app.get('/api', (req, res) => {
   res.json({ 
     message: 'Collaborative Whiteboard API',
     status: 'running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    cors_origins: [
+      'http://localhost:3000',
+      'https://whiteboard-frontend-jade.vercel.app',
+      'https://*.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter(Boolean)
+  });
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 

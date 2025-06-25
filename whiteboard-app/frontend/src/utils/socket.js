@@ -12,10 +12,18 @@ class SocketManager {
       this.disconnect();
     }
 
+    console.log('Attempting to connect to:', backendUrl);
+
     this.socket = io(backendUrl, {
       transports: ['websocket', 'polling'],
       upgrade: true,
-      rememberUpgrade: true
+      rememberUpgrade: true,
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      maxReconnectionAttempts: 5
     });
 
     this.setupDefaultListeners();
@@ -26,18 +34,41 @@ class SocketManager {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('Connected to server:', this.socket.id);
+      console.log('✅ Connected to server:', this.socket.id);
       this.emit('socket-connected', { socketId: this.socket.id });
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('Disconnected from server:', reason);
+      console.log('❌ Disconnected from server:', reason);
       this.emit('socket-disconnected', { reason });
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('🔥 Connection error:', error.message);
+      this.emit('socket-error', { error: error.message });
     });
 
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
       this.emit('socket-error', { error });
+    });
+
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log('🔄 Reconnected after', attemptNumber, 'attempts');
+      this.emit('socket-reconnected', { attemptNumber });
+    });
+
+    this.socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log('🔄 Reconnection attempt:', attemptNumber);
+    });
+
+    this.socket.on('reconnect_error', (error) => {
+      console.error('🔥 Reconnection error:', error.message);
+    });
+
+    this.socket.on('reconnect_failed', () => {
+      console.error('💀 Failed to reconnect to server');
+      this.emit('socket-error', { error: 'Failed to reconnect to server' });
     });
 
     this.socket.on('room-joined', (data) => {

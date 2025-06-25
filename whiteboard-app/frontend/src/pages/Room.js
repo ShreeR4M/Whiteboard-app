@@ -63,6 +63,19 @@ const Room = () => {
         return;
       }
 
+      // Test backend connectivity first
+      try {
+        const healthCheck = await fetch(`${BACKEND_URL}/api/health`);
+        if (!healthCheck.ok) {
+          throw new Error('Backend health check failed');
+        }
+        console.log('✅ Backend is healthy');
+      } catch (healthError) {
+        console.error('❌ Backend health check failed:', healthError);
+        setConnectionError('Backend server is not responding. Please check your connection.');
+        return;
+      }
+
       socketManager.connect(BACKEND_URL);
       
       setupSocketListeners();
@@ -71,11 +84,17 @@ const Room = () => {
         joinRoom();
       } else {
         socketManager.on('socket-connected', joinRoom);
+        // Set a timeout for connection
+        setTimeout(() => {
+          if (!socketManager.isConnected()) {
+            setConnectionError('Unable to establish real-time connection. Please check your internet connection.');
+          }
+        }, 10000);
       }
 
     } catch (error) {
       console.error('Error initializing room:', error);
-      setConnectionError('Failed to connect to room');
+      setConnectionError(`Failed to connect to room: ${error.message}`);
     }
   };
 
