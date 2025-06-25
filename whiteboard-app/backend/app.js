@@ -25,7 +25,10 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin:[
+     'http://localhost:3000','https://whiteboard-frontend-jade.vercel.app',
+    process.env.CORS_ORIGIN || '*'
+  ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
